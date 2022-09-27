@@ -1,0 +1,17 @@
+matplotlib
+numpy
+tqdm
+
+torch==1.8.1
+torchvision
+tensorboard
+
+transformers==3.4.0
+sentence-transformers
+
+deep-translator
+googletrans==4.0.0rc1
+pythainlp
+python-crfsuite
+indic-nlp-library
+PyNLPIR
