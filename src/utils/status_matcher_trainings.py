@@ -18,7 +18,7 @@ if __name__ == "__main__":
     for sym in ["ar", "de", "el", "es", "hi", "ru", "th", "tr", "vi", "zh-CN", "iw"]:
         for enq in [True, False]:
 
-            input_path = f'{opt.input_path}/{"enq_new" if enq else "non_enq_new"}/train_matcher_{sym}{"_enq" if enq else ""}/predict_results.json'
+            input_path = f'{opt.input_path}/{"enq_new" if enq else "non_enq_new"}/train_matcher_{sym}/predict_results.json'
             try:
                 with open(input_path) as json_file:
                     full_doc = json.load(json_file)
