@@ -6,7 +6,7 @@ import re
 import os
 from tqdm import tqdm
 
-from src.utils.smart_match import ModelMatcher
+from src.utils.smart_match import ModelMatcher, CorrelationMatcher
 
 
 def hash_original(original_dataset_path):
@@ -35,10 +35,17 @@ if __name__ == "__main__":
     parser.add_argument('--original_dataset_path', type=str, default='/home/ofri/qa_translate/data/squad/train-v2.0.json')
     parser.add_argument('--match_thresh', type=float, default=0.95, help='threshold for matcher')
     parser.add_argument('--output_dir', type=str, help='path for output dir')
+    parser.add_argument('--from_en', action='store_true', help='match from english')
+    parser.add_argument('--correlation', action='store_true', help='use correlation matcher')
 
     opt = parser.parse_args()
 
-    matcher = ModelMatcher(model_name_or_path=opt.model_path)
+    for k, v in opt.__dict__.items(): print(f'{k}:\t{v}')
+
+    if opt.correlation:
+        matcher = CorrelationMatcher('bert-base-multilingual-cased')
+    else:
+        matcher = ModelMatcher(model_name_or_path=opt.model_path)
 
     with open(opt.base_input_path) as json_file:
         full_doc = json.load(json_file)
@@ -52,12 +59,12 @@ if __name__ == "__main__":
     new_data = []
     multiple = 0
 
-    for si, subject in enumerate(data):
-        print(f'section {si}/{len(data)}')
+    from_en = opt.from_en
+    for si, subject in enumerate(tqdm(data)):
         title = subject['title'] if 'title' in subject else ''
         paragraphs = subject['paragraphs']
 
-        for paragraph in tqdm(paragraphs):
+        for paragraph in paragraphs:
 
             for qa in paragraph['qas']:
 
@@ -84,7 +91,7 @@ if __name__ == "__main__":
                                 continue
 
                             translated_context = ans['translated_context']
-                            original_text = orig_dict[qa['id']]['answers'][0]['text']
+                            original_text = ans['original_text'] if from_en else ans['text'] #orig_dict[qa['id']]['answers'][0]['text']
                             translated_offset = ans['translated_offset']
                             new_answer, score = matcher.match(translated_context, original_text)
 
@@ -106,9 +113,9 @@ if __name__ == "__main__":
 
     phase = 'dev' if 'dev' in opt.base_input_path else 'train'
     out_dir = opt.output_dir or os.path.dirname(opt.base_input_path)
-    output_path = f'{out_dir}/{phase}_v2.0hf_{opt.lang}_{opt.match_thresh:.2f}_enq.json'
+    output_path = f'{out_dir}/{phase}_v1.0hf_{opt.lang}_{opt.match_thresh:.2f}_enq.json'
     with open(output_path, 'w') as json_out:
         full_doc['data'] = new_data
-        full_doc['version'] = 'v2.0'
+        full_doc['version'] = 'v1.0'
         json.dump(full_doc, json_out, ensure_ascii=False)
         print(f'file saved: {output_path}')
