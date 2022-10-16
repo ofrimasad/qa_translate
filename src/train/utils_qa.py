@@ -158,6 +158,7 @@ def postprocess_qa_predictions(
         if version_2_with_negative:
             # Add the minimum null prediction
             prelim_predictions.append(min_null_prediction)
+            # if min_null_prediction is none, you probably have duplicate ids
             null_score = min_null_prediction["score"]
 
         # Only keep the best `n_best_size` predictions.
