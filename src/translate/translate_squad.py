@@ -7,7 +7,7 @@ from tqdm import tqdm
 from languages import LANGUAGES
 from src.languages.english import English
 from src.services.google_translate import GoogleTranslate
-from src.utils.smart_match import CorrelationMatcher
+from src.utils.smart_match import ModelMatcher, Matcher
 from src.utils.utils import DictionaryLink, TextList, SentenceSpliter
 
 SEP = '34456'
@@ -74,7 +74,8 @@ def index_to_sentence_index(index: int, sentences: list):
 
 
 def align_indices(original_context: str, translated_context: str, original_text: str, translated_text: str,
-                  link: DictionaryLink, sentence_splitter: SentenceSpliter, matcher: CorrelationMatcher = None, match_thresh: float = 0.6, stats: Stats = None):
+                  link: DictionaryLink, sentence_splitter: SentenceSpliter, matcher: Matcher = None,
+                  match_thresh: float = 0.6, stats: Stats = None, base_mode: bool = False):
     try:
         using_separetor = SEP in original_context
 
@@ -141,7 +142,9 @@ def align_indices(original_context: str, translated_context: str, original_text:
                 stats.lost_in_trans += 1
         elif len(translated_start_indices) == 0:
             # translation does not include the answer
-            if matcher is not None:
+            if base_mode:
+                save_base_data(link, translated_context, translated_text, translated_offset, original_text)
+            elif matcher is not None:
                 replace(link, match_thresh, matcher, stats, translated_context, translated_text, translated_offset)
             else:
                 link.object["answer_start"] = -1
@@ -154,7 +157,9 @@ def align_indices(original_context: str, translated_context: str, original_text:
                 link.object["answer_start"] = translated_start_indices[occurrence_index] + translated_offset
             else:
                 # could not find the occurrence
-                if matcher is not None:
+                if base_mode:
+                    save_base_data(link, translated_context, translated_text, translated_offset, original_text)
+                elif matcher is not None:
                     replace(link, match_thresh, matcher, stats, translated_context, translated_text, translated_offset)
                 else:
                     link.object["answer_start"] = -1
@@ -164,24 +169,28 @@ def align_indices(original_context: str, translated_context: str, original_text:
         link.object["answer_start"] = -1
 
 
-def replace(link: DictionaryLink, match_thresh: float, matcher: CorrelationMatcher, stats: Stats, translated_context: str,
+def replace(link: DictionaryLink, match_thresh: float, matcher: Matcher, stats: Stats, translated_context: str,
             translated_text: str, translated_offset: int):
+    new_answer, score = matcher.match(translated_context, translated_text)
+    if score > match_thresh:
+        link.set(new_answer)
+        translated_start_indices = [_.start() for _ in re.finditer(re.escape(new_answer), translated_context)]
+        link.object["answer_start"] = translated_start_indices[0] + translated_offset
+        stats.matched_and_replaced += 1
+        stats.not_lost_in_trans += 1
+        link.object['replaced'] = True
+    else:
+        link.object["answer_start"] = -1
+        stats.lost_in_trans += 1
+        stats.could_not_replace += 1
+
+
+def save_base_data(link: DictionaryLink, translated_context: str, translated_text: str, translated_offset: int, original_text: str):
     link.object['need_replace'] = True
     link.object['translated_text'] = translated_text
     link.object['translated_context'] = translated_context
     link.object['translated_offset'] = translated_offset
-    # new_answer, score = matcher.match(translated_context, translated_text)
-    # if score > match_thresh:
-    #     link.set(new_answer)
-    #     translated_start_indices = [_.start() for _ in re.finditer(re.escape(new_answer), translated_context)]
-    #     link.object["answer_start"] = translated_start_indices[0] + translated_offset
-    #     stats.matched_and_replaced += 1
-    #     stats.not_lost_in_trans += 1
-    #     link.object['replaced'] = True
-    # else:
-    #     link.object["answer_start"] = -1
-    #     stats.lost_in_trans += 1
-    #     stats.could_not_replace += 1
+    link.object['original_text'] = original_text
 
 
 if __name__ == "__main__":
@@ -193,6 +202,9 @@ if __name__ == "__main__":
     parser.add_argument('--no_markers', action='store_true', help='do not use markers to split context')
     parser.add_argument('--replace', action='store_true', help='replace answers missing from context')
     parser.add_argument('--skip_impossible', action='store_true', help='skip questions which are impossible')
+    parser.add_argument('--base_mode', action='store_true', help='skip questions which are impossible')
+    parser.add_argument('--match_model', type=str, help='model for matcher')
+    parser.add_argument('--match_thresh', type=float, default=0.5, help='threshold for matcher')
 
     opt = parser.parse_args()
     stats = Stats()
@@ -200,8 +212,12 @@ if __name__ == "__main__":
     target = LANGUAGES[opt.language_sym]
     output_json = opt.input_json.replace('.json', f'_{target.symbol}_base_n.json')
     translator = GoogleTranslate(source=English, target=target)
-    matcher = ""  # ModelMatcher(model_name_or_path='/home/ofri/qa_translate/exp_xquad/train_ss_de') # 'onlplab/alephbert-base'
-    # matcher = CorrelationMatcher(model_name_or_path='bert-base-multilingual-cased') if opt.replace else None
+
+    if opt.match_model:
+        matcher = ModelMatcher(model_name_or_path=opt.match_model)
+    else:
+        matcher = None
+
     sentence_splitter = SentenceSpliter()
 
     with open(opt.input_json) as json_file:
@@ -257,8 +273,8 @@ if __name__ == "__main__":
 
                     if link.label == 'text':  # this is an answer text
                         # this is an answer text
-                        align_indices(original_context, translated_context, text, translated_text, link,
-                                      sentence_splitter=sentence_splitter, matcher=matcher, stats=stats)
+                        align_indices(original_context, translated_context, text, translated_text, link, match_thresh=opt.match_thresh,
+                                      sentence_splitter=sentence_splitter, matcher=matcher, stats=stats, base_mode=opt.base_mode)
                     else:
                         link.set(translated_text)
 
