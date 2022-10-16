@@ -1,6 +1,7 @@
 
-export PYTHONPATH=/home/ofri/qa_translate/src
-export DATAPATH=/home/ofri/qa_translate/data
+export BASEPATH=/home/ofri/qa_translate
+export PYTHONPATH=${BASEPATH}/src
+export DATAPATH=${BASEPATH}/data
 
 for lang in "ar" "de" "el" "es" "hi" "ru" "th" "tr" "vi" "zh-CN" "iw"
 do

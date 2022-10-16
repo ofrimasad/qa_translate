@@ -1,6 +1,7 @@
 # batch (total on all devices = 16)
-export PYTHONPATH=/home/ofri/qa_translate/src
-export DATAPATH=/home/ofri/qa_translate/data
+export BASEPATH=/home/ofri/qa_translate
+export PYTHONPATH=${BASEPATH}/src
+export DATAPATH=${BASEPATH}/data
 export CUDA_VISIBLE_DEVICES=2,3
 
 python ${PYTHONPATH}/train/run_qa.py \
@@ -23,7 +24,7 @@ python ${PYTHONPATH}/train/run_qa.py \
   --warmup_ratio 0.06 \
   --eval_steps 40 \
   --evaluation_strategy steps \
-  --output_dir ${PYTHONPATH}/exp/parashoot_reproduce \
+  --output_dir ${BASEPATH}/exp/parashoot_reproduce \
   --run_name parashoot_reproduce \
   --overwrite_output_dir \
   --overwrite_cache \

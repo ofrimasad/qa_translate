@@ -1,6 +1,7 @@
 # batch (total on all devices = 16)
-export PYTHONPATH=/home/ofri/qa_translate/src
-export DATAPATH=/home/ofri/qa_translate/data
+export BASEPATH=/home/ofri/qa_translate
+export PYTHONPATH=${BASEPATH}/src
+export DATAPATH=${BASEPATH}/data
 export CUDA_VISIBLE_DEVICES=2,3
 
 for lang in "de" "el" "ru" "tr" "ar" "vi" "th" "hi" "zh-CN"
@@ -10,7 +11,7 @@ do
     --train_file ${DATAPATH}/squad/v1.1_translated/train-v1.1_${lang.json \
     --validation_file ${DATAPATH}/xquad/xquad.$lang.v1.1_format.json \
     --test_file ${DATAPATH}/xquad/xquad.$lang.v1.1_format.json \
-    --output_dir ${PYTHONPATH}/exp_xquad/train_squad_test_xquad_$lang \
+    --output_dir ${BASEPATH}/exp_xquad/train_squad_test_xquad_$lang \
     --run_name train_squad_test_xquad_$lang_01 \
     --do_train \
     --do_eval \
