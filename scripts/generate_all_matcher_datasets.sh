@@ -1,5 +1,5 @@
 
-export PYTHONPATH=/home/ofri/qa_translate
+export PYTHONPATH=/home/ofri/qa_translate/src
 
 for lang in "ar" "de" "el" "es" "hi" "ru" "th" "tr" "vi" "zh-CN" "iw"
 do

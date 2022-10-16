@@ -1,5 +1,5 @@
 # batch (total on all devices = 16)
-export PYTHONPATH=/home/ofri/qa_translate
+export PYTHONPATH=/home/ofri/qa_translate/src
 CUDA_VISIBLE_DEVICES=0,1,2,3 python /home/ofri/qa_translate/src/train/run_qa.py \
   --model_name_or_path bert-base-multilingual-cased \
   --train_file /home/ofri/qa_translate/data/squad/train-v1.1-he_2.json \

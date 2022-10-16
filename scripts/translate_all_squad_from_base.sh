@@ -1,5 +1,5 @@
 export CUDA_VISIBLE_DEVICES=0
-export PYTHONPATH=/home/ofri/qa_translate
+export PYTHONPATH=/home/ofri/qa_translate/src
 
 for lang in "ar" "de" "el" "es" "hi"
 do

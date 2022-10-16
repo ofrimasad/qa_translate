@@ -1,5 +1,5 @@
 # batch (total on all devices = 16)
-export PYTHONPATH=/home/ofri/qa_translate
+export PYTHONPATH=/home/ofri/qa_translate/src
 export CUDA_VISIBLE_DEVICES=2,3
 
 for lang in "de" "el" "ru" "tr" "ar" "vi" "th" "hi" "zh"
