@@ -2,16 +2,14 @@ import argparse
 import json
 import re
 
-import wikipediaapi
 from tqdm import tqdm
 
 from languages import LANGUAGES
 from src.languages.english import English
 from src.services.google_translate import GoogleTranslate
 from src.utils.smart_match import CorrelationMatcher
-from src.utils.utils import DictionaryLink, TextList, get_git_revision_short_hash, SentenceSpliter
+from src.utils.utils import DictionaryLink, TextList, SentenceSpliter
 
-wiki_wiki = wikipediaapi.Wikipedia('en')
 
 SEP = '34456'
 
@@ -26,8 +24,6 @@ class Stats:
         self.different_num_of_sections = 0
         self.lost_in_trans = 0
         self.not_lost_in_trans = 0
-        self.found_in_wiki = 0
-        self.not_found_in_wiki = 0
         self.matched_and_replaced = 0
         self.could_not_replace = 0
 
@@ -195,7 +191,6 @@ if __name__ == "__main__":
     parser.add_argument('input_json', type=str)
     parser.add_argument('language_sym', type=str)
     parser.add_argument('-r', '--readable', action='store_true', help='readable json output format')
-    parser.add_argument('-w', '--wiki', action='store_true', help='fetch wiki context')
     parser.add_argument('--no_markers', action='store_true', help='do not use markers to split context')
     parser.add_argument('--replace', action='store_true', help='replace answers missing from context')
     parser.add_argument('--skip_impossible', action='store_true', help='skip questions which are impossible')
@@ -220,8 +215,6 @@ if __name__ == "__main__":
             print(f'Part {ind + 1} / {len(data)}\n')
 
             paragraphs = subject['paragraphs']
-            if opt.wiki:
-                page_py = wiki_wiki.page(subject['title'])
 
             for paragraph in tqdm(paragraphs):
 
@@ -264,17 +257,6 @@ if __name__ == "__main__":
                 for text, link, translated_text in zip(text_list.texts, text_list.links, translated_text_list):
 
                     if link.label == 'text':  # this is an answer text
-                        if opt.wiki:
-                            if page_py is not None and 'he' in page_py.langlinks:
-                                summary = page_py.langlinks['he'].summary
-
-                                if translated_text in summary:
-                                    stats.found_in_wiki += 1
-                                else:
-                                    stats.not_found_in_wiki += 1
-                            else:
-                                stats.not_found_in_wiki += 1
-
                         # this is an answer text
                         align_indices(original_context, translated_context, text, translated_text, link,
                                       sentence_splitter=sentence_splitter, matcher=matcher, stats=stats)
@@ -283,11 +265,6 @@ if __name__ == "__main__":
 
                 paragraph['translated'] = True
                 paragraph['context'] = clean_translated_context(translated_context)
-
-            if opt.wiki:
-                print(f'found in summery: {stats.found_in_wiki}')
-                print(f'not found in summery: {stats.not_found_in_wiki}')
-                print(f'coverage: {100 * stats.found_in_wiki / (stats.found_in_wiki + stats.not_found_in_wiki):.1f}%')
 
         # second pass - clean answers with None answer_start
         for d in tqdm(data):
