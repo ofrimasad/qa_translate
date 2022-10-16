@@ -10,7 +10,6 @@ from src.services.google_translate import GoogleTranslate
 from src.utils.smart_match import CorrelationMatcher
 from src.utils.utils import DictionaryLink, TextList, SentenceSpliter
 
-
 SEP = '34456'
 
 
@@ -65,6 +64,7 @@ def clean_translated_context(context: str):
 def clean_translated_sub_context(sub_context: str):
     return sub_context.strip().strip('[').strip(']')
 
+
 def index_to_sentence_index(index: int, sentences: list):
     total = 0
     for i, s in enumerate(sentences):
@@ -75,7 +75,6 @@ def index_to_sentence_index(index: int, sentences: list):
 
 def align_indices(original_context: str, translated_context: str, original_text: str, translated_text: str,
                   link: DictionaryLink, sentence_splitter: SentenceSpliter, matcher: CorrelationMatcher = None, match_thresh: float = 0.6, stats: Stats = None):
-
     try:
         using_separetor = SEP in original_context
 
@@ -201,7 +200,7 @@ if __name__ == "__main__":
     target = LANGUAGES[opt.language_sym]
     output_json = opt.input_json.replace('.json', f'_{target.symbol}_base_n.json')
     translator = GoogleTranslate(source=English, target=target)
-    matcher = "" #ModelMatcher(model_name_or_path='/home/ofri/qa_translate/exp_xquad/train_ss_de') # 'onlplab/alephbert-base'
+    matcher = ""  # ModelMatcher(model_name_or_path='/home/ofri/qa_translate/exp_xquad/train_ss_de') # 'onlplab/alephbert-base'
     # matcher = CorrelationMatcher(model_name_or_path='bert-base-multilingual-cased') if opt.replace else None
     sentence_splitter = SentenceSpliter()
 
