@@ -5,6 +5,7 @@ import random
 import re
 import sys
 from os import path
+from typing import List
 
 import numpy as np
 import os
@@ -12,12 +13,12 @@ from deep_translator.exceptions import NotValidPayload, NotValidLength, RequestE
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
-from languages import LANGUAGES
-from languages.abstract_language import Language
+from src.languages import LANGUAGES
+from src.languages.abstract_language import Language
 from src.languages.english import English
 from src.services.google_translate import GoogleTranslate
-from utils.squad2_to_squad2tf import squad2_to_squad2hf
-from utils.utils import SentenceSpliter, WordSpliter, ThaiWordSpliter, ChineseWordSpliter, ThaiSentenceSpliter, IndicSentenceSpliter
+from src.utils.squad2_to_squad2tf import squad2_to_squad2hf
+from src.utils.utils import SentenceSpliter, WordSpliter, ThaiWordSpliter, ChineseWordSpliter, ThaiSentenceSpliter, IndicSentenceSpliter
 
 
 class Stats:
@@ -119,6 +120,19 @@ def init_writer(_opt: argparse.Namespace, target: Language) -> SummaryWriter:
     writer = SummaryWriter(log_dir=f'/home/ofri/qa_translate/data_gen_logs/{target.symbol}_{phase}{"_enq" if _opt.enq else ""}')
     writer.add_hparams(hparam_dict=_opt.__dict__, metric_dict={})
     return writer
+
+def find_shortest(start_with:str, end_with:str, text:str) -> List[str]:
+    start_loc = [i.regs[0][0] for i in re.finditer(re.escape(start_with), text)]
+    end_loc = [i.regs[0][1] for i in re.finditer(re.escape(end_with), text)]
+
+    min_len = 100000000
+    min_text = ""
+    for s in start_loc:
+        for e in end_loc:
+            if e > s and e - s < min_len:
+                min_len = e - s
+                min_text = text[s:e]
+    return [min_text]
 
 
 if __name__ == "__main__":
@@ -231,8 +245,9 @@ if __name__ == "__main__":
                         if span == 1:
                             phrase_translated = translated_tokens[start]
                         else:
-                            instances = re.findall(rf"{re.escape(translated_tokens[start])}.*?{re.escape(translated_tokens[start + span - 1])}",
-                                                   sentence)  # " ".join(translated_tokens[start: start + span])
+                            instances = find_shortest(translated_tokens[start], translated_tokens[start+span-1], sentence)
+                                # re.findall(rf"{re.escape(translated_tokens[start])}.*?{re.escape(translated_tokens[start + span - 1])}",
+                                #                    sentence)  # " ".join(translated_tokens[start: start + span])
                             # if len(instances) != 1:
                             #     logger.debug('multiple instance')
                             #     continue
