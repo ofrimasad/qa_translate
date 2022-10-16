@@ -4,7 +4,7 @@ export CUDA_VISIBLE_DEVICES=2,3
 
 for lang in "es" #"de" "el" "ru" "tr"
 do
-  python ${PYTHONPATH}/src/train/run_qa.py \
+  python ${PYTHONPATH}/train/run_qa.py \
     --model_name_or_path bert-base-multilingual-cased \
     --train_file ${PYTHONPATH}/data/squad/translated_by_xquad/squad.translate.train.en-${lang}.v1.1.json \
     --validation_file ${PYTHONPATH}/data/xquad/xquad.${lang}.v1.1_format.json \

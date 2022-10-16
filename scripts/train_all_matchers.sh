@@ -8,7 +8,7 @@ export CUDA_VISIBLE_DEVICES=0,1
 
 for lang in "ar" "de" "el" "es" "hi" # "ru" "th" "tr" "vi" "zh-CN" "iw"
 do
-  python ${PYTHONPATH}/src/train/run_qa.py \
+  python ${PYTHONPATH}/train/run_qa.py \
     --model_name_or_path=bert-base-multilingual-cased \
     --train_file=/home/ofri/hebrew_qa/data/matcher_datasets_new/train-v2.0hf_${lang}_base_matcher_${lang}_enq.json \
     --validation_file=/home/ofri/hebrew_qa/data/matcher_datasets_new/dev-v2.0hf_${lang}_base_matcher_${lang}_enq.json \

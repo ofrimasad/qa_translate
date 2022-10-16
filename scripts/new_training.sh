@@ -1,7 +1,7 @@
 # batch (total on all devices = 16)
 export PYTHONPATH=/home/ofri/qa_translate/src
 export CUDA_VISIBLE_DEVICES=2,3
-python ${PYTHONPATH}/src/train/run_qa.py \
+python ${PYTHONPATH}/train/run_qa.py \
   --model_name_or_path bert-base-multilingual-cased \
   --train_file ${PYTHONPATH}/data/parashoot/train.json \
   --validation_file ${PYTHONPATH}/data/parashoot/dev.json \
@@ -28,7 +28,7 @@ python ${PYTHONPATH}/src/train/run_qa.py \
   --num_train_epochs 5 \
   --he_metrics
 
-python ${PYTHONPATH}/src/train/run_qa.py \
+python ${PYTHONPATH}/train/run_qa.py \
   --model_name_or_path bert-base-multilingual-cased \
   --train_file ${PYTHONPATH}/data/squad/train-v1.1-he_0.json \
   --validation_file ${PYTHONPATH}/data/parashoot/dev.json \
@@ -55,7 +55,7 @@ python ${PYTHONPATH}/src/train/run_qa.py \
   --num_train_epochs 5 \
   --he_metrics
 
-python ${PYTHONPATH}/src/train/run_qa.py \
+python ${PYTHONPATH}/train/run_qa.py \
   --model_name_or_path bert-base-multilingual-cased \
   --train_file ${PYTHONPATH}/data/squad/train-v1.1-he_1.json \
   --validation_file ${PYTHONPATH}/data/parashoot/dev.json \
@@ -82,7 +82,7 @@ python ${PYTHONPATH}/src/train/run_qa.py \
   --num_train_epochs 5 \
   --he_metrics
 
-python ${PYTHONPATH}/src/train/run_qa.py \
+python ${PYTHONPATH}/train/run_qa.py \
   --model_name_or_path bert-base-multilingual-cased \
   --train_file ${PYTHONPATH}/data/squad/train-v1.1-he_2.json \
   --validation_file ${PYTHONPATH}/data/parashoot/dev.json \
@@ -109,7 +109,7 @@ python ${PYTHONPATH}/src/train/run_qa.py \
   --num_train_epochs 5 \
   --he_metrics
 
-python ${PYTHONPATH}/src/train/run_qa.py \
+python ${PYTHONPATH}/train/run_qa.py \
   --model_name_or_path bert-base-multilingual-cased \
   --train_file ${PYTHONPATH}/data/squad/train-v1.1-he_2-sub1792.json \
   --validation_file ${PYTHONPATH}/data/parashoot/dev.json \
@@ -136,7 +136,7 @@ python ${PYTHONPATH}/src/train/run_qa.py \
   --num_train_epochs 5 \
   --he_metrics
 
-python ${PYTHONPATH}/src/train/run_qa.py \
+python ${PYTHONPATH}/train/run_qa.py \
   --model_name_or_path bert-base-multilingual-cased \
   --train_file ${PYTHONPATH}/data/squad/train-v1.1-he_2-sub53352.json \
   --validation_file ${PYTHONPATH}/data/parashoot/dev.json \
