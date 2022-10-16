@@ -91,7 +91,7 @@ if __name__ == "__main__":
                                 continue
 
                             translated_context = ans['translated_context']
-                            original_text = ans['original_text'] if from_en else ans['text'] #orig_dict[qa['id']]['answers'][0]['text']
+                            original_text = ans['original_text'] if from_en else ans['translated_text'] #orig_dict[qa['id']]['answers'][0]['text']
                             translated_offset = ans['translated_offset']
                             new_answer, score = matcher.match(translated_context, original_text)
 
@@ -113,7 +113,7 @@ if __name__ == "__main__":
 
     phase = 'dev' if 'dev' in opt.base_input_path else 'train'
     out_dir = opt.output_dir or os.path.dirname(opt.base_input_path)
-    output_path = f'{out_dir}/{phase}_v1.0hf_{opt.lang}_{opt.match_thresh:.2f}_enq.json'
+    output_path = f'{out_dir}/{phase}_v1.0hf_{opt.lang}_{opt.match_thresh:.2f}{"_enq" if opt.from_en else ""}.json'
     with open(output_path, 'w') as json_out:
         full_doc['data'] = new_data
         full_doc['version'] = 'v1.0'
