@@ -1,11 +1,13 @@
 # batch (total on all devices = 16)
 export PYTHONPATH=/home/ofri/qa_translate/src
+export DATAPATH=/home/ofri/qa_translate/data
 export CUDA_VISIBLE_DEVICES=2,3
+
 python ${PYTHONPATH}/train/run_qa.py \
   --model_name_or_path bert-base-multilingual-cased \
-  --train_file ${PYTHONPATH}/data/parashoot/train.json \
-  --validation_file ${PYTHONPATH}/data/parashoot/dev.json \
-  --test_file ${PYTHONPATH}/data/parashoot/test.json \
+  --train_file ${DATAPATH}/parashoot/train.json \
+  --validation_file ${DATAPATH}/parashoot/dev.json \
+  --test_file ${DATAPATH}/parashoot/test.json \
   --do_train \
   --do_eval \
   --do_predict \
@@ -30,9 +32,9 @@ python ${PYTHONPATH}/train/run_qa.py \
 
 python ${PYTHONPATH}/train/run_qa.py \
   --model_name_or_path bert-base-multilingual-cased \
-  --train_file ${PYTHONPATH}/data/squad/train-v1.1-he_0.json \
-  --validation_file ${PYTHONPATH}/data/parashoot/dev.json \
-  --test_file ${PYTHONPATH}/data/parashoot/all.json \
+  --train_file ${DATAPATH}/squad/train-v1.1-he_0.json \
+  --validation_file ${DATAPATH}/parashoot/dev.json \
+  --test_file ${DATAPATH}/parashoot/all.json \
   --do_train \
   --do_eval \
   --do_predict \
@@ -57,9 +59,9 @@ python ${PYTHONPATH}/train/run_qa.py \
 
 python ${PYTHONPATH}/train/run_qa.py \
   --model_name_or_path bert-base-multilingual-cased \
-  --train_file ${PYTHONPATH}/data/squad/train-v1.1-he_1.json \
-  --validation_file ${PYTHONPATH}/data/parashoot/dev.json \
-  --test_file ${PYTHONPATH}/data/parashoot/all.json \
+  --train_file ${DATAPATH}/squad/train-v1.1-he_1.json \
+  --validation_file ${DATAPATH}/parashoot/dev.json \
+  --test_file ${DATAPATH}/parashoot/all.json \
   --do_train \
   --do_eval \
   --do_predict \
@@ -84,9 +86,9 @@ python ${PYTHONPATH}/train/run_qa.py \
 
 python ${PYTHONPATH}/train/run_qa.py \
   --model_name_or_path bert-base-multilingual-cased \
-  --train_file ${PYTHONPATH}/data/squad/train-v1.1-he_2.json \
-  --validation_file ${PYTHONPATH}/data/parashoot/dev.json \
-  --test_file ${PYTHONPATH}/data/parashoot/all.json \
+  --train_file ${DATAPATH}/squad/train-v1.1-he_2.json \
+  --validation_file ${DATAPATH}/parashoot/dev.json \
+  --test_file ${DATAPATH}/parashoot/all.json \
   --do_train \
   --do_eval \
   --do_predict \
@@ -111,9 +113,9 @@ python ${PYTHONPATH}/train/run_qa.py \
 
 python ${PYTHONPATH}/train/run_qa.py \
   --model_name_or_path bert-base-multilingual-cased \
-  --train_file ${PYTHONPATH}/data/squad/train-v1.1-he_2-sub1792.json \
-  --validation_file ${PYTHONPATH}/data/parashoot/dev.json \
-  --test_file ${PYTHONPATH}/data/parashoot/all.json \
+  --train_file ${DATAPATH}/squad/train-v1.1-he_2-sub1792.json \
+  --validation_file ${DATAPATH}/parashoot/dev.json \
+  --test_file ${DATAPATH}/parashoot/all.json \
   --do_train \
   --do_eval \
   --do_predict \
@@ -138,9 +140,9 @@ python ${PYTHONPATH}/train/run_qa.py \
 
 python ${PYTHONPATH}/train/run_qa.py \
   --model_name_or_path bert-base-multilingual-cased \
-  --train_file ${PYTHONPATH}/data/squad/train-v1.1-he_2-sub53352.json \
-  --validation_file ${PYTHONPATH}/data/parashoot/dev.json \
-  --test_file ${PYTHONPATH}/data/parashoot/all.json \
+  --train_file ${DATAPATH}/squad/train-v1.1-he_2-sub53352.json \
+  --validation_file ${DATAPATH}/parashoot/dev.json \
+  --test_file ${DATAPATH}/parashoot/all.json \
   --do_train \
   --do_eval \
   --do_predict \

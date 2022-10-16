@@ -1,11 +1,13 @@
 # batch (total on all devices = 16)
 export PYTHONPATH=/home/ofri/qa_translate/src
+export DATAPATH=/home/ofri/qa_translate/data
 export CUDA_VISIBLE_DEVICES=2,3
+
 python ${PYTHONPATH}/train/run_qa.py \
   --model_name_or_path bert-base-multilingual-cased \
-  --train_file ${PYTHONPATH}/data/parashoot/train.json \
-  --validation_file ${PYTHONPATH}/data/parashoot/dev.json \
-  --test_file ${PYTHONPATH}/data/parashoot/test.json \
+  --train_file ${DATAPATH}/parashoot/train.json \
+  --validation_file ${DATAPATH}/parashoot/dev.json \
+  --test_file ${DATAPATH}/parashoot/test.json \
   --do_train \
   --do_eval \
   --do_predict \
