@@ -1,6 +1,6 @@
 import re
 
-from src.languages.abstract_language import Language
+from languages.abstract_language import Language
 
 
 class Hebrew(Language):

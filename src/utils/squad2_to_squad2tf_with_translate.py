@@ -59,7 +59,7 @@ import json
 import re
 from tqdm import tqdm
 
-from src.utils.smart_match import ModelMatcher
+from utils.smart_match import ModelMatcher
 
 if __name__ == "__main__":
 

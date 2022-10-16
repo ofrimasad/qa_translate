@@ -13,12 +13,12 @@ from deep_translator.exceptions import NotValidPayload, NotValidLength, RequestE
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
-from src.languages import LANGUAGES
-from src.languages.abstract_language import Language
-from src.languages.english import English
-from src.services.google_translate import GoogleTranslate
-from src.utils.squad2_to_squad2tf import squad2_to_squad2hf
-from src.utils.utils import SentenceSpliter, WordSpliter, ThaiWordSpliter, ChineseWordSpliter, ThaiSentenceSpliter, IndicSentenceSpliter
+from languages import LANGUAGES
+from languages.abstract_language import Language
+from languages.english import English
+from services.google_translate import GoogleTranslate
+from utils.squad2_to_squad2tf import squad2_to_squad2hf
+from utils.utils import SentenceSpliter, WordSpliter, ThaiWordSpliter, ChineseWordSpliter, ThaiSentenceSpliter, IndicSentenceSpliter
 
 
 class Stats:

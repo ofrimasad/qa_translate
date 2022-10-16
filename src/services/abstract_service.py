@@ -2,7 +2,7 @@ from typing import Union, Type
 
 from tensorboard.compat.tensorflow_stub.errors import UnimplementedError
 
-from src.languages.abstract_language import Language
+from languages.abstract_language import Language
 
 
 class AbstractTranslationService:

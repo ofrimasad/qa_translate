@@ -1,7 +1,7 @@
 from typing import Type
 
-from src.languages.abstract_language import Language
-from src.services.abstract_service import AbstractTranslationService
+from languages.abstract_language import Language
+from services.abstract_service import AbstractTranslationService
 
 
 class CounterService(AbstractTranslationService):

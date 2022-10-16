@@ -6,7 +6,7 @@ import re
 import os
 from tqdm import tqdm
 
-from src.utils.smart_match import ModelMatcher, CorrelationMatcher
+from utils.smart_match import ModelMatcher, CorrelationMatcher
 
 
 def hash_original(original_dataset_path):

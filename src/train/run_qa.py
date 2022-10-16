@@ -44,9 +44,9 @@ from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import check_min_version
 from transformers.utils.versions import require_version
 
-from src.metrics.squad.squad_extended import SquadExtended
-from src.train.trainer_qa import QuestionAnsweringTrainer
-from src.train.utils_qa import postprocess_qa_predictions
+from metrics.squad.squad_extended import SquadExtended
+from train.trainer_qa import QuestionAnsweringTrainer
+from train.utils_qa import postprocess_qa_predictions
 
 
 # Will error if the minimal version of Transformers is not installed. Remove at your own risks.

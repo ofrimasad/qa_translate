@@ -4,8 +4,8 @@ from typing import Type
 from deep_translator import GoogleTranslator
 from deep_translator.exceptions import TooManyRequests
 
-from src.languages.abstract_language import Language
-from src.services.abstract_service import AbstractTranslationService
+from languages.abstract_language import Language
+from services.abstract_service import AbstractTranslationService
 
 
 class GoogleTranslate(AbstractTranslationService):

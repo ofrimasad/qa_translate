@@ -5,10 +5,10 @@ import re
 from tqdm import tqdm
 
 from languages import LANGUAGES
-from src.languages.english import English
-from src.services.google_translate import GoogleTranslate
-from src.utils.smart_match import ModelMatcher, Matcher
-from src.utils.utils import DictionaryLink, TextList, SentenceSpliter
+from languages.english import English
+from services.google_translate import GoogleTranslate
+from utils.smart_match import ModelMatcher, Matcher
+from utils.utils import DictionaryLink, TextList, SentenceSpliter
 
 SEP = '34456'
 

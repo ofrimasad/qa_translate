@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
 
-from src.utils.smart_match import CorrelationMatcher, ModelMatcher
+from utils.smart_match import CorrelationMatcher, ModelMatcher
 
 BASE_DIR = '/home/ofri/qa_translate/matcher_eval/'
 
