@@ -13,8 +13,7 @@ from src.utils.utils import DictionaryLink, TextList, get_git_revision_short_has
 
 wiki_wiki = wikipediaapi.Wikipedia('en')
 
-SEP = '\n'
-
+SEP = '34456'
 
 
 class Stats:
@@ -49,16 +48,37 @@ class Stats:
         return _str
 
 
-def add_markers(s: str):
-    sentences = SentenceSpliter.sentence_split(s)
-    return SEP.join(sentences)
+def add_markers(text: str, sentence_splitter: SentenceSpliter):
+    sentences = sentence_splitter.sentence_split(text)
+    out = ''
+    for s in sentences[:-1]:
+        out += f'{s}[{SEP}] '
+    out += sentences[-1]
+    return out
+
+
+def fix_sep(context: str):
+    return re.sub('3,?\.?4,?\.?4,?\.?5,?\.?6', SEP, context, count=100)
+
+
+def clean_translated_context(context: str):
+    context = fix_sep(context)
+    return context.replace(f'[{SEP}]', '').replace(f'[ {SEP}]', '').replace(f'[{SEP} ]', '').replace(f'{SEP}]', '').replace(f'[{SEP}', '').replace(SEP, '')
+
 
 def clean_translated_sub_context(sub_context: str):
     return sub_context.strip().strip('[').strip(']')
 
+def index_to_sentence_index(index: int, sentences: list):
+    total = 0
+    for i, s in enumerate(sentences):
+        total += len(s) + 1
+        if index < total:
+            return i
+
 
 def align_indices(original_context: str, translated_context: str, original_text: str, translated_text: str,
-                  link: DictionaryLink, matcher: CorrelationMatcher = None, match_thresh: float = 0.6, stats: Stats = None):
+                  link: DictionaryLink, sentence_splitter: SentenceSpliter, matcher: CorrelationMatcher = None, match_thresh: float = 0.6, stats: Stats = None):
 
     try:
         using_separetor = SEP in original_context
@@ -66,26 +86,27 @@ def align_indices(original_context: str, translated_context: str, original_text:
         original_text = original_text.strip().strip('.')
         translated_text = translated_text.strip().strip('.')
 
-        link.object['original_text'] = original_text
         link.set(translated_text)
 
+        translated_context = fix_sep(translated_context)
+
+        original_context = original_context.replace(f'[{SEP}]', '')
         original_start_index = link.object["answer_start"]
 
         if using_separetor:
-            count = 0
-            for original_sentence, translated_sentence in zip(original_context.split(SEP), translated_context.split(SEP)):
-                count += len(original_sentence) + 1
-                if count > original_start_index:
-                    translated_sub_context = translated_sentence
-                    original_sub_context = original_sentence
-                    break
+            original_sentences = sentence_splitter.sentence_split(original_context)
 
-        if using_separetor and len(original_context.split(SEP)) == len(translated_context.split(SEP)):
+            sentence_index = len(sentence_splitter.sentence_split(original_context[0:original_start_index])) - 1
+            original_sub_context = original_sentences[sentence_index]
+            translated_sub_context = translated_context.split(SEP)[sentence_index]
+
+        if using_separetor and len(original_sentences) == len(translated_context.split(SEP)):
             # IF SENTENCE SPLITTING WORKED PROPERLY
             stats.same_num_of_sections += 1
 
             # clean context cnd sub_context from markers
-            translated_context = translated_context.replace(SEP, " ")
+            translated_sub_context = clean_translated_sub_context(translated_sub_context)
+            translated_context = clean_translated_context(translated_context)
 
             # find the offset of the sub context in the context
             original_offset = original_context.find(original_sub_context)
@@ -99,7 +120,7 @@ def align_indices(original_context: str, translated_context: str, original_text:
             stats.different_num_of_sections += 1
             original_offset = 0
             translated_offset = 0
-            translated_context = translated_context.replace(SEP, " ")
+            translated_context = clean_translated_context(translated_context)
 
         original_start_indices = [_.start() for _ in re.finditer(re.escape(original_text), original_context)]
         original_start_index = link.object["answer_start"] - original_offset
@@ -183,10 +204,11 @@ if __name__ == "__main__":
     stats = Stats()
 
     target = LANGUAGES[opt.language_sym]
-    output_json = opt.input_json.replace('.json', f'_{target.symbol}_base.json')
+    output_json = opt.input_json.replace('.json', f'_{target.symbol}_base_n.json')
     translator = GoogleTranslate(source=English, target=target)
     matcher = "" #ModelMatcher(model_name_or_path='/home/ofri/qa_translate/exp_xquad/train_ss_de') # 'onlplab/alephbert-base'
     # matcher = CorrelationMatcher(model_name_or_path='bert-base-multilingual-cased') if opt.replace else None
+    sentence_splitter = SentenceSpliter()
 
     with open(opt.input_json) as json_file:
         full_doc = json.load(json_file)
@@ -207,12 +229,9 @@ if __name__ == "__main__":
                     continue
 
                 text_list = TextList()
-                if "\u200b" in subject['title']:
-                    subject['title'] = subject['title'].strip("\u200b")
-
                 text_list.append(subject, 'title')
                 if not opt.no_markers:
-                    paragraph['context'] = add_markers(paragraph['context'])
+                    paragraph['context'] = add_markers(paragraph['context'], sentence_splitter)
                 text_list.append(paragraph, 'context')
 
                 qas = paragraph['qas']
@@ -257,12 +276,13 @@ if __name__ == "__main__":
                                 stats.not_found_in_wiki += 1
 
                         # this is an answer text
-                        align_indices(original_context, translated_context, text, translated_text, link, matcher=matcher, stats=stats)
+                        align_indices(original_context, translated_context, text, translated_text, link,
+                                      sentence_splitter=sentence_splitter, matcher=matcher, stats=stats)
                     else:
                         link.set(translated_text)
 
                 paragraph['translated'] = True
-                paragraph['context'] = translated_context.replace(SEP, " ")
+                paragraph['context'] = clean_translated_context(translated_context)
 
             if opt.wiki:
                 print(f'found in summery: {stats.found_in_wiki}')
@@ -298,8 +318,7 @@ if __name__ == "__main__":
                 if len(new_qas) > 0:
                     new_paragraphs.append(paragraph)
             d['paragraphs'] = new_paragraphs
-    except Exception as e:
-        print(e)
+
     finally:
         print('Saving to file')
         print(stats)
@@ -309,7 +328,6 @@ if __name__ == "__main__":
             print(f'file saved: {output_json}')
         with open(output_json.replace('json', 'txt'), 'w') as text_out:
             text_out.write("\n".join(f'{o[0]}: {o[1]}' for o in opt.__dict__.items()))
-            text_out.write(f'\ncommit: {get_git_revision_short_hash()}')
             text_out.write('\n\n===== stats =====\n')
             text_out.write(str(stats))
             print(stats)
