@@ -8,7 +8,7 @@ from languages import LANGUAGES
 from languages.english import English
 from services.google_translate import GoogleTranslate
 from utils.smart_match import ModelMatcher, Matcher
-from utils.utils import DictionaryLink, TextList, SentenceSpliter
+from utils.translation_utils import DictionaryLink, TextList, SentenceSpliter
 
 SEP = '34456'
 
