@@ -58,6 +58,7 @@ if __name__ == "__main__":
     data = full_doc['data']
     new_data = []
     multiple = 0
+    require_translation, not_require_translation, success = 0,0,0
 
     from_en = opt.from_en
     for si, subject in enumerate(tqdm(data)):
@@ -85,7 +86,7 @@ if __name__ == "__main__":
                     new_item['answers'] = {'text': [], 'answer_start': []}
                     for ans in qa['answers']:
                         if 'need_replace' in ans and ans['need_replace']:
-
+                            require_translation += 1
                             # drop empty answer
                             if ans['text'] == "":
                                 continue
@@ -96,13 +97,17 @@ if __name__ == "__main__":
                             new_answer, score = matcher.match(translated_context, original_text)
 
                             if score > opt.match_thresh:
+                                success += 1
                                 translated_start_indices = [_.start() for _ in re.finditer(re.escape(new_answer), translated_context)]
                                 if len(translated_start_indices) == 1:
                                     new_item['answers']['text'].append(new_answer)
                                     new_item['answers']['answer_start'].append(translated_start_indices[0] + translated_offset)
                                 else:
                                     multiple += 1
+                            else:
+                                multiple += 1
                         else:
+                            not_require_translation += 1
                             new_item['answers']['text'].append(ans['text'])
                             new_item['answers']['answer_start'].append(ans['answer_start'])
 
@@ -114,6 +119,9 @@ if __name__ == "__main__":
     phase = 'dev' if 'dev' in opt.base_input_path else 'train'
     out_dir = opt.output_dir or os.path.dirname(opt.base_input_path)
     output_path = f'{out_dir}/{phase}_v1.0hf_{opt.lang}_{opt.match_thresh:.2f}{"_enq" if opt.from_en else ""}.json'
+    print(f'require: {require_translation}')
+    print(f'not require {not_require_translation}')
+    print(f'success: {success}')
     with open(output_path, 'w') as json_out:
         full_doc['data'] = new_data
         full_doc['version'] = 'v1.0'
