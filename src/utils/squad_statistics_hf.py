@@ -1,8 +1,9 @@
 import argparse
 import json
-import os.path
-import fnmatch
 
+import os
+
+import fnmatch
 from tqdm import tqdm
 import numpy as np
 import matplotlib.pyplot as plt
@@ -38,7 +39,7 @@ def draw_hist(data: list, title):
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('input_path', type=str)
+    parser.add_argument('input_path', type=str, required=True)
     parser.add_argument('--match', type=str)
     parser.add_argument('--draw', action='store_true')
     parser.add_argument('--distribution', action='store_true')
@@ -58,7 +59,7 @@ if __name__ == "__main__":
 
     for file_path in files:
 
-        with open(file_path) as json_file:
+        with open(opt.input_json) as json_file:
             full_doc = json.load(json_file)
             data = full_doc['data']
 
@@ -71,62 +72,66 @@ if __name__ == "__main__":
         answers_count = 0
         impossible_a_count = 0
         impossible_article = 0
+        max_len = 0
 
         translated = 0
         non_translated = 0
-        for subject in tqdm(data):
+        q_over_100 = 0
+        a_over_100 = 0
+        for paragraph in tqdm(data):
             has_impossible = False
 
-            paragraphs = subject['paragraphs']
-            for paragraph in paragraphs:
+            if 'translated' in paragraph and paragraph['translated']:
+                translated += 1
+            else:
+                non_translated += 1
 
-                if 'translated' in paragraph and paragraph['translated']:
-                    translated += 1
-                else:
-                    non_translated += 1
+            context = paragraph['context']
 
-                context = paragraph['context']
-                context_words = context.split(' ')
-                context_lengths.append(len(context_words))
-                qas = paragraph['qas']
-                for qa in qas:
-                    question = qa['question']
-                    question_words = question.split(' ')
-                    questions_lengths.append(len(question_words))
-                    count_q_word(question)
+            context_words = context.split(' ')
+            context_lengths.append(len(context_words))
 
-                    questions_count += 1
+            question = paragraph['question']
+            q_over_100 += 1 if len(question) > 100 else 0
 
-                    if 'plausible_answers' in qa:
-                        answers = qa['plausible_answers']
-                    else:
-                        answers = qa['answers']
+            question_words = question.split(' ')
+            questions_lengths.append(len(question_words))
+            count_q_word(question)
 
-                    impossible = "is_impossible" in qa and qa["is_impossible"]
-                    if impossible:
-                        impossible_q_count += 1
-                        has_impossible = True
 
-                    number_of_answers.append(len(answers))
-                    for ans in answers:
-                        ans_text = ans['text']
-                        ans_text_words = ans_text.split(' ')
-                        answers_lengths.append(len(ans_text_words))
-                        answers_count += 1
-                        if impossible:
-                            impossible_a_count += 1
-            if has_impossible:
-                impossible_article += 1
+
+            answers = paragraph['answers']
+
+            impossible = len(answers['text']) == 0
+            if impossible:
+                impossible_q_count += 1
+                has_impossible = True
+
+            number_of_answers.append(len(answers['text']))
+            for ans_text, start_index in zip(answers['text'], answers['answer_start']):
+                a_over_100 += 1 if len(ans_text) > 100 else 0
+                questions_count += 1
+                ans_text_words = ans_text.split(' ')
+                max_len = max(max_len, len(ans_text))
+                answers_lengths.append(len(ans_text_words))
+                answers_count += 1
+                if context[start_index:start_index + len(ans_text)] != ans_text:
+                    print("error")
+
+
         values, counts = np.unique(questions_first_words, return_counts=True)
 
-        print(f'Statistics for file {file_path}')
+        print(f'longest answer: {max_len}')
+        print(f'q_over_100: {q_over_100}')
+        print(f'a_over_100: {a_over_100}')
+
         print(f'translated: {translated} not translated: {non_translated} ({translated * 100/ (translated + non_translated):.2f}%)')
+        print(f'Statistics for file {opt.input_json}')
         print(f'Number of questions: {questions_count}')
         print(f'Total articles: {len(data)}')
         print(f'Articles with impossible questions: {impossible_article}')
         print(f'Number of impossible questions: {impossible_q_count} ({100 * impossible_q_count / questions_count:.1f}%)')
         print(f'Number of possible questions: {questions_count - impossible_q_count} ({100 * (questions_count - impossible_q_count) / questions_count:.1f}%)')
-
         if opt.distribution:
             print(f'Question word distribution:')
             print_dict(questions_first_words, True)
