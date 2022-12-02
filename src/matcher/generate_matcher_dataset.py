@@ -145,21 +145,6 @@ if __name__ == "__main__":
     target = LANGUAGES[opt.language_sym]
 
     writer = init_writer(opt, target)
-    word_splitter = WordSpliter
-    sentence_spliter = SentenceSpliter
-
-    if target.symbol == "th":
-        word_splitter = ThaiWordSpliter
-        sentence_spliter = ThaiSentenceSpliter
-
-    if target.symbol == "zh-CN":
-        word_splitter = ChineseWordSpliter
-
-    if target.symbol == "hi":
-        sentence_spliter = IndicSentenceSpliter
-
-    logger.info(f'Using sentence spliter: {sentence_spliter.__name__}')
-    logger.info(f'Using word spliter: {word_splitter.__name__}')
 
     output_json_enq = opt.input_json.replace('.json', f'_matcher_{target.symbol}_enq.json')
     output_json = opt.input_json.replace('.json', f'_matcher_{target.symbol}.json')
@@ -211,8 +196,7 @@ if __name__ == "__main__":
                         translated_context = original_context
                     else:
                         translated_context = translator.translate(original_context)
-                    full_stop = "。" if target.symbol == 'zh-CN' else "."
-                    translated_sentences = sentence_spliter.sentence_split(translated_context, full_stop)
+                    translated_sentences = target.split_to_sentences(translated_context)
                 except (NotValidPayload, NotValidLength, RequestError, RuntimeError) as e:
                     logger.debug('cant translate')
                     continue
@@ -222,7 +206,7 @@ if __name__ == "__main__":
                 contexts = []
 
                 for sentence in translated_sentences:
-                    translated_tokens = word_splitter.word_split(sentence)
+                    translated_tokens = target.split_to_words(sentence)
 
                     # use only sentences longer than opt.minimum_words_in_sentence words
                     if len(translated_tokens) < opt.minimum_words_in_sentence:
