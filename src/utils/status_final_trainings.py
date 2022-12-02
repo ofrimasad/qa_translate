@@ -15,17 +15,19 @@ if __name__ == "__main__":
 
 
 
-    for sym in ["ar", "de", "el", "es", "hi", "ru", "th", "tr", "vi", "zh-CN", "iw"]:
+    for sym in ["ar", "de", "el", "es", "hi", "ru", "th", "tr", "vi", "zh-CN"]:
         for enq in [ False]:
 
-            input_path = f'{opt.input_path}/train_squad_correlation_test_xquad_{sym}/predict_results.json'
-            # input_path = f'{opt.input_path}/train_squad_test_xquad_{sym}/predict_results.json'
+            predict_path = f'{opt.input_path}_{sym}/predict_results.json'
+            train_path = f'{opt.input_path}_{sym}/train_results.json'
 
             try:
-                with open(input_path) as json_file:
-                    full_doc = json.load(json_file)
+                with open(predict_path) as json_file:
+                    predict_doc = json.load(json_file)
+                with open(train_path) as json_file:
+                    train_doc = json.load(json_file)
 
-                print(f'{input_path}\t{full_doc["test_f1"]}\t{full_doc["test_exact_match"]}')
+                print(f'{sym}\t{predict_doc["test_f1"]:.2f}\t{predict_doc["test_exact_match"]:.2f}\t{train_doc["train_samples"]}')
             except:
-                print(f'{input_path}')
+                print(f'{sym}')
 
