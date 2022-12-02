@@ -18,7 +18,7 @@ from languages.abstract_language import Language
 from languages.english import English
 from services.google_translate import GoogleTranslate
 from utils.squad2_to_squad2tf import squad2_to_squad2hf
-from utils.utils import SentenceSpliter, WordSpliter, ThaiWordSpliter, ChineseWordSpliter, ThaiSentenceSpliter, IndicSentenceSpliter
+from utils.translation_utils import SentenceSpliter, WordSpliter, ThaiWordSpliter, ChineseWordSpliter, ThaiSentenceSpliter, IndicSentenceSpliter
 
 
 class Stats:
@@ -234,8 +234,8 @@ if __name__ == "__main__":
 
                     for attempt in range(opt.max_attempts):
                         # randomly select the start token and span
-                        start = random.randint(0, len(translated_tokens) - 8)
                         span = random_positive_normal_int(1, opt.max_span, opt.scale)
+                        start = random.randint(0, len(translated_tokens) - span - 1)
                         if (start, span) in used_spans:
                             logger.debug('used spans')
                             continue
@@ -245,7 +245,7 @@ if __name__ == "__main__":
                         if span == 1:
                             phrase_translated = translated_tokens[start]
                         else:
-                            instances = find_shortest(translated_tokens[start], translated_tokens[start+span-1], sentence)
+                            instances = find_shortest(translated_tokens[start], translated_tokens[start + span], sentence)
                                 # re.findall(rf"{re.escape(translated_tokens[start])}.*?{re.escape(translated_tokens[start + span - 1])}",
                                 #                    sentence)  # " ".join(translated_tokens[start: start + span])
                             # if len(instances) != 1:
@@ -287,58 +287,54 @@ if __name__ == "__main__":
                 if len(inv_translated_phrases) != len(phrases):
                     continue
 
-                last_context = ''
+                last_context = contexts[0]
                 qas = []
                 qas_enq = []
                 for phrase_translated, answer_start, context, phrase_translated_again, inv_translated_phrase in zip(phrases, answer_starts, contexts,
                                                                                                                     re_translated_phrases,
                                                                                                                     inv_translated_phrases):
 
-                    if context == last_context and len(qas) >= opt.num_phrases_in_sentence:
-                        continue
+                    # if context == last_context and len(qas) >= opt.num_phrases_in_sentence:
+                    #     continue
 
-                    if context != last_context and len(qas) > 0:
-                        stats.num_sentences += 1
-                        new_paragraphs.append({'context': context, 'qas': qas})
+                    if context != last_context: # when context changed - save new paragraph
+                        if len(qas) > 0:
+                            stats.num_sentences += 1
+                            writer.add_scalar(tag='generated_instances', scalar_value=stats.num_possible_questions, global_step=global_step)
+                            new_paragraphs.append({'context': last_context, 'qas': qas})
                         if len(qas_enq) > 0:
-                            new_paragraphs_enq.append({'context': context, 'qas': qas_enq})
-                        writer.add_scalar(tag='generated_instances', scalar_value=stats.num_possible_questions, global_step=global_step)
+                            new_paragraphs_enq.append({'context': last_context, 'qas': qas_enq})
+
                         qas = []
                         qas_enq = []
 
                     last_context = context
-                    if inv_translated_phrase != phrase_translated:
-                        qas_enq.append({'id': f'mm{target.symbol}{next_id}',
-                                        'is_impossible': False,
-                                        'question': inv_translated_phrase,
-                                        'answers': [{'text': phrase_translated,
-                                                     'answer_start': answer_start}]})
-
-                    if phrase_translated_again == phrase_translated:
-                        logger.debug('same translation')
-                        continue
 
                     # make sure qa is valid
                     if context[answer_start:answer_start + len(phrase_translated)] != phrase_translated:
                         logger.debug('wrong index')
                         continue
 
-                    qas.append({'id': f'mm{target.symbol}{next_id}',
-                                'is_impossible': False,
-                                'question': phrase_translated_again,
-                                'answers': [{'text': phrase_translated,
-                                             'answer_start': answer_start}]})
-                    next_id += 1
-                    stats.num_possible_questions += 1
+                    # if inv_translated_phrase != phrase_translated:  # removed since it makes the matcher dismiss names and non-translatable words
+                    if len(qas_enq) <= opt.num_phrases_in_sentence:
+                        qas_enq.append({'id': f'mm{target.symbol}{next_id}',
+                                        'is_impossible': False,
+                                        'question': inv_translated_phrase,
+                                        'answers': [{'text': phrase_translated,
+                                                     'answer_start': answer_start}]})
 
-                    if len(qas) >= opt.num_phrases_in_sentence:
-                        stats.num_sentences += 1
-                        new_paragraphs.append({'context': context, 'qas': qas})
-                        if len(qas_enq) > 0:
-                            new_paragraphs_enq.append({'context': context, 'qas': qas_enq})
-                        writer.add_scalar(tag='generated_instances', scalar_value=stats.num_possible_questions, global_step=global_step)
-                        qas = []
-                        qas_enq = []
+                    if len(qas) <= opt.num_phrases_in_sentence:
+                        if phrase_translated_again != phrase_translated:
+                            qas.append({'id': f'mm{target.symbol}{next_id}',
+                                        'is_impossible': False,
+                                        'question': phrase_translated_again,
+                                        'answers': [{'text': phrase_translated,
+                                                     'answer_start': answer_start}]})
+                        else:
+                            logger.debug('same translation')
+
+                        next_id += 1
+                        stats.num_possible_questions += 1
 
         # add impossible
         add_impossibles(new_paragraphs, stats, next_id=70000000000000000000)
