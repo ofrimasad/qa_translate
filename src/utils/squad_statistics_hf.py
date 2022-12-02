@@ -39,7 +39,7 @@ def draw_hist(data: list, title):
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('input_path', type=str, required=True)
+    parser.add_argument('input_path', type=str)
     parser.add_argument('--match', type=str)
     parser.add_argument('--draw', action='store_true')
     parser.add_argument('--distribution', action='store_true')
@@ -59,7 +59,7 @@ if __name__ == "__main__":
 
     for file_path in files:
 
-        with open(opt.input_json) as json_file:
+        with open(file_path) as json_file:
             full_doc = json.load(json_file)
             data = full_doc['data']
 
@@ -121,12 +121,12 @@ if __name__ == "__main__":
 
         values, counts = np.unique(questions_first_words, return_counts=True)
 
-        print(f'longest answer: {max_len}')
-        print(f'q_over_100: {q_over_100}')
-        print(f'a_over_100: {a_over_100}')
-
-        print(f'translated: {translated} not translated: {non_translated} ({translated * 100/ (translated + non_translated):.2f}%)')
-        print(f'Statistics for file {opt.input_json}')
+        # print(f'longest answer: {max_len}')
+        # print(f'q_over_100: {q_over_100}')
+        # print(f'a_over_100: {a_over_100}')
+        #
+        # print(f'translated: {translated} not translated: {non_translated} ({translated * 100/ (translated + non_translated):.2f}%)')
+        print(f'Statistics for file {file_path}')
         print(f'Number of questions: {questions_count}')
         print(f'Total articles: {len(data)}')
         print(f'Articles with impossible questions: {impossible_article}')
