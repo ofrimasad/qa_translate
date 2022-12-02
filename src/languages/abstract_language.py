@@ -1,3 +1,6 @@
+from typing import List
+
+from utils.translation_utils import WordSpliter, SentenceSpliter
 
 
 class Language:
@@ -24,5 +27,12 @@ class Language:
 
         return count / max_count > 0.8
 
+    @classmethod
+    def split_to_words(cls, text: str) -> List[str]:
+        return WordSpliter.word_split(text)
+
+    @classmethod
+    def split_to_sentences(cls, text: str) -> List[str]:
+        return SentenceSpliter.sentence_split(text)
 
 
