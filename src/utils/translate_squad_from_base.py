@@ -36,9 +36,13 @@ if __name__ == "__main__":
     parser.add_argument('--match_thresh', type=float, default=0.95, help='threshold for matcher')
     parser.add_argument('--output_dir', type=str, help='path for output dir')
     parser.add_argument('--from_en', action='store_true', help='match from english')
+    parser.add_argument('--augment', action='store_true', help='match from english')
     parser.add_argument('--correlation', action='store_true', help='use correlation matcher')
 
     opt = parser.parse_args()
+
+    # assert not (opt.augment and opt.from_en), "can't augment when using from english"
+
 
     for k, v in opt.__dict__.items(): print(f'{k}:\t{v}')
 
@@ -80,10 +84,11 @@ if __name__ == "__main__":
                     'id': qa['id']
                 }
 
-                if qa['is_impossible']:
+                if 'is_impossible' in qa and qa['is_impossible']:
                     new_item['answers'] = {'text': [], 'answer_start': []}
                 else:
                     new_item['answers'] = {'text': [], 'answer_start': []}
+                    # assert len(qa['answers']) == 1
                     for ans in qa['answers']:
                         if 'need_replace' in ans and ans['need_replace']:
                             require_translation += 1
@@ -92,7 +97,10 @@ if __name__ == "__main__":
                                 continue
 
                             translated_context = ans['translated_context']
+                            if translated_context is None or translated_context == "":
+                                continue
                             original_text = ans['original_text'] if from_en else ans['translated_text'] #orig_dict[qa['id']]['answers'][0]['text']
+                            translated_text = ans['translated_text']
                             translated_offset = ans['translated_offset']
                             new_answer, score = matcher.match(translated_context, original_text)
 
@@ -100,8 +108,15 @@ if __name__ == "__main__":
                                 success += 1
                                 translated_start_indices = [_.start() for _ in re.finditer(re.escape(new_answer), translated_context)]
                                 if len(translated_start_indices) == 1:
-                                    new_item['answers']['text'].append(new_answer)
-                                    new_item['answers']['answer_start'].append(translated_start_indices[0] + translated_offset)
+                                    if opt.augment:
+                                        new_item['answers']['text'].append(translated_text)
+                                        new_item['answers']['answer_start'].append(translated_start_indices[0] + translated_offset)
+                                        cont = new_item['context']
+                                        cont = cont[:new_item['answers']['answer_start'][-1]] + new_item['answers']['text'][-1] + cont[new_item['answers']['answer_start'][-1] + len(new_answer):]
+                                        new_item['context'] = cont
+                                    else:
+                                        new_item['answers']['text'].append(new_answer)
+                                        new_item['answers']['answer_start'].append(translated_start_indices[0] + translated_offset)
                                 else:
                                     multiple += 1
                             else:
@@ -118,7 +133,7 @@ if __name__ == "__main__":
 
     phase = 'dev' if 'dev' in opt.base_input_path else 'train'
     out_dir = opt.output_dir or os.path.dirname(opt.base_input_path)
-    output_path = f'{out_dir}/{phase}_v1.0hf_{opt.lang}_{opt.match_thresh:.2f}{"_enq" if opt.from_en else ""}.json'
+    output_path = f'{out_dir}/{phase}_v1.0hf_{opt.lang}_{opt.match_thresh:.2f}{"_enq" if opt.from_en else ""}{"_aug" if opt.augment else ""}.json'
     print(f'require: {require_translation}')
     print(f'not require {not_require_translation}')
     print(f'success: {success}')
