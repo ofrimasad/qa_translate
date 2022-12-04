@@ -106,8 +106,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument('--minimum_words_in_sentence', type=int, default=15, help='minimum words allowed in a valid sentence')
     parser.add_argument('--num_phrases_in_sentence', type=int, default=4, help='number of phrases to extract from each sentence')
     parser.add_argument('--max_attempts', type=int, default=30, help='maximum number of attempts per sentence')
-    parser.add_argument('--max_span', type=int, default=7, help='maximum number of words in a phrase')
-    parser.add_argument('--scale', type=int, default=3, help='standard deviation of the distribution of number of words in a phrase')
+    parser.add_argument('--max_span', type=int, default=17, help='maximum number of words in a phrase')
+    parser.add_argument('--scale', type=int, default=6, help='standard deviation of the distribution of number of words in a phrase')
     parser.add_argument('--max_sections', type=int, default=600, help='maximum number of original sections')
     parser.add_argument('--out_dir', type=str, help='output directory')
     parser.add_argument('--max_possible', type=int, default=500000, help='maximum number of possible answers')
@@ -218,7 +218,7 @@ if __name__ == "__main__":
 
                     for attempt in range(opt.max_attempts):
                         # randomly select the start token and span
-                        span = random_positive_normal_int(1, opt.max_span, opt.scale)
+                        span = random_positive_normal_int(1, min(opt.max_span, len(translated_tokens) - 3), opt.scale)
                         start = random.randint(0, len(translated_tokens) - span - 1)
                         if (start, span) in used_spans:
                             logger.debug('used spans')
