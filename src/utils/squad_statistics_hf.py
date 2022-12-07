@@ -37,16 +37,15 @@ def draw_hist(data: list, title):
     plt.show()
 
 
-def extract_stats(data: list, file_path: None):
+def extract_stats(data: list, file_path=None):
 
     questions_lengths = []
     answers_lengths = []
     number_of_answers = []
     context_lengths = []
-    questions_count = 0
+    possible_q_count = 0
     impossible_q_count = 0
     answers_count = 0
-    impossible_a_count = 0
     impossible_article = 0
     max_len = 0
     translated = 0
@@ -57,7 +56,6 @@ def extract_stats(data: list, file_path: None):
     end_loc = []
 
     for paragraph in tqdm(data):
-        has_impossible = False
 
         if 'translated' in paragraph and paragraph['translated']:
             translated += 1
@@ -81,12 +79,13 @@ def extract_stats(data: list, file_path: None):
         impossible = len(answers['text']) == 0
         if impossible:
             impossible_q_count += 1
-            has_impossible = True
+        else:
+            possible_q_count += 1
 
         number_of_answers.append(len(answers['text']))
         for ans_text, start_index in zip(answers['text'], answers['answer_start']):
             a_over_100 += 1 if len(ans_text) > 100 else 0
-            questions_count += 1
+
             ans_text_words = ans_text.split(' ')
             max_len = max(max_len, len(ans_text))
             answers_lengths.append(len(ans_text_words))
@@ -103,11 +102,11 @@ def extract_stats(data: list, file_path: None):
     # print(f'translated: {translated} not translated: {non_translated} ({translated * 100/ (translated + non_translated):.2f}%)')
     if file_path is not None:
         print(f'Statistics for file {file_path}')
-    print(f'Number of questions: {questions_count}')
+    print(f'Number of questions: {possible_q_count + impossible_q_count}')
     print(f'Total articles: {len(data)}')
     print(f'Articles with impossible questions: {impossible_article}')
-    print(f'Number of impossible questions: {impossible_q_count} ({100 * impossible_q_count / questions_count:.1f}%)')
-    print(f'Number of possible questions: {questions_count - impossible_q_count} ({100 * (questions_count - impossible_q_count) / questions_count:.1f}%)')
+    print(f'Number of impossible questions: {impossible_q_count} ({100 * impossible_q_count / (possible_q_count + impossible_q_count):.1f}%)')
+    print(f'Number of possible questions: {possible_q_count} ({100 * possible_q_count / (possible_q_count + impossible_q_count):.1f}%)')
     if opt.distribution:
         print(f'Question word distribution:')
         print_dict(questions_first_words, True)
@@ -146,5 +145,5 @@ if __name__ == "__main__":
             full_doc = json.load(json_file)
             data = full_doc['data']
 
-        extract_stats(data)
+        extract_stats(data, file_path)
 
