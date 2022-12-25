@@ -205,13 +205,18 @@ if __name__ == "__main__":
     parser.add_argument('--base_mode', action='store_true', help='skip questions which are impossible')
     parser.add_argument('--match_model', type=str, help='model for matcher')
     parser.add_argument('--match_thresh', type=float, default=0.5, help='threshold for matcher')
+    parser.add_argument('--newline_sep', action='store_true', help='use newline as seperator')
 
     opt = parser.parse_args()
     stats = Stats()
 
+    for k, v in opt.__dict__.items(): print(f'{k}:\t{v}')
+
     target = LANGUAGES[opt.language_sym]
     output_json = opt.input_json.replace('.json', f'_{target.symbol}_base_n.json')
     translator = GoogleTranslate(source=English, target=target)
+    if opt.newline_sep:
+        SEP = '\n'
 
     if opt.match_model:
         matcher = ModelMatcher(model_name_or_path=opt.match_model)
@@ -246,7 +251,7 @@ if __name__ == "__main__":
 
                 skip_all = True
                 for qa in qas:
-                    if qa['is_impossible'] and opt.skip_impossible:
+                    if 'is_impossible' in qa and qa['is_impossible'] and opt.skip_impossible:
                         continue
 
                     skip_all = False
