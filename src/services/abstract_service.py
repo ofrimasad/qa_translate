@@ -5,6 +5,11 @@ from tensorboard.compat.tensorflow_stub.errors import UnimplementedError
 from languages.abstract_language import Language
 
 
+def _handle_exceptions(texts: list):
+    if texts[0] == 'tanrı': texts[0] = 'tanrı.'
+    return texts
+
+
 class AbstractTranslationService:
 
     def __init__(self, source: Type[Language], target: Type[Language]):
@@ -27,8 +32,8 @@ class AbstractTranslationService:
         :param texts: list of texts. texts[1] is assumed to be the context
         :return: translated list with the same len
         """
+        texts = _handle_exceptions(texts)
         full_text = self.separator.join(texts)
-
         if len(texts) == 1 or len(texts[1]) > self.max_len:
             return texts
 
