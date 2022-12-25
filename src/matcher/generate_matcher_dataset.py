@@ -9,7 +9,7 @@ from typing import List
 
 import numpy as np
 import os
-from deep_translator.exceptions import NotValidPayload, NotValidLength, RequestError
+from deep_translator.exceptions import NotValidPayload, NotValidLength, RequestError, TranslationNotFound
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
@@ -18,6 +18,7 @@ from languages.abstract_language import Language
 from languages.english import English
 from services.google_translate import GoogleTranslate
 from utils.squad2_to_squad2tf import squad2_to_squad2hf
+from utils.squad_statistics_hf import draw_hist
 from utils.translation_utils import SentenceSpliter, WordSpliter, ThaiWordSpliter, ChineseWordSpliter, ThaiSentenceSpliter, IndicSentenceSpliter
 
 
@@ -26,6 +27,7 @@ class Stats:
     def __init__(self):
         self.num_sentences = 0
         self.num_possible_questions = 0
+        self.num_possible_questions_enq = 0
         self.num_impossible_questions = 0
 
     def __str__(self):
@@ -182,7 +184,7 @@ if __name__ == "__main__":
 
             paragraphs = subject['paragraphs']
 
-            if stats.num_possible_questions > opt.max_possible:
+            if stats.num_possible_questions > opt.max_possible and stats.num_possible_questions_enq > opt.max_possible:
                 break
 
             for paragraph in tqdm(paragraphs):
@@ -197,7 +199,7 @@ if __name__ == "__main__":
                     else:
                         translated_context = translator.translate(original_context)
                     translated_sentences = target.split_to_sentences(translated_context)
-                except (NotValidPayload, NotValidLength, RequestError, RuntimeError) as e:
+                except (NotValidPayload, NotValidLength, RequestError, RuntimeError, TranslationNotFound) as e:
                     logger.debug('cant translate')
                     continue
 
@@ -264,7 +266,7 @@ if __name__ == "__main__":
                     inv_translated_phrases = inverse_translator.translate_together(phrases)
 
                     re_translated_phrases = translator.translate_together(inv_translated_phrases)
-                except (NotValidPayload, NotValidLength, RequestError, RuntimeError) as e:
+                except (NotValidPayload, NotValidLength, RequestError, RuntimeError, TranslationNotFound) as e:
                     logger.debug('cant translate')
                     continue
 
@@ -306,6 +308,7 @@ if __name__ == "__main__":
                                         'question': inv_translated_phrase,
                                         'answers': [{'text': phrase_translated,
                                                      'answer_start': answer_start}]})
+                        stats.num_possible_questions_enq += 1
 
                     if len(qas) <= opt.num_phrases_in_sentence:
                         if phrase_translated_again != phrase_translated:
@@ -314,11 +317,12 @@ if __name__ == "__main__":
                                         'question': phrase_translated_again,
                                         'answers': [{'text': phrase_translated,
                                                      'answer_start': answer_start}]})
+                            stats.num_possible_questions += 1
                         else:
                             logger.debug('same translation')
 
-                        next_id += 1
-                        stats.num_possible_questions += 1
+                    next_id += 1
+
 
         # add impossible
         add_impossibles(new_paragraphs, stats, next_id=70000000000000000000)
