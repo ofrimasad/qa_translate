@@ -32,7 +32,7 @@ def plot_precision_recall(results: np.ndarray, model_name):
     recall = recall[::-1]
     precision = precision[::-1]
 
-    precision[0] = precision[1]
+    # precision[0] = precision[1]
     em[-1] = em[-2]
 
     plt.plot(recall, precision)
@@ -42,6 +42,8 @@ def plot_precision_recall(results: np.ndarray, model_name):
     plt.ylabel('Precision')
     plt.xlim(0, 1)
     plt.ylim(0, 1.1)
+    if precision[-2] - precision[-1] > 0.1:
+        plt.annotate(f'th:{thresholds[2]:.2f}\np:{precision[-2]:.2f} r: {recall[-2]:.2f}', xy=(recall[-2], precision[-2]))
     plt.show()
 
     plt.plot(thresholds, em)
