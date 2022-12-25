@@ -8,7 +8,7 @@ from tqdm import tqdm
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-i', '--input_path', type=str, required=True)
+    parser.add_argument('input_path', type=str)
 
     opt = parser.parse_args()
 
@@ -17,7 +17,7 @@ if __name__ == "__main__":
         files = [opt.input_path]
     else:
         files = os.listdir(opt.input_path)
-        files = [os.path.join(opt.input_path, f) for f in files if f.endswith('.json')]
+        files = [os.path.join(opt.input_path, f) for f in files if f.endswith('.json') and "hf" not in f and "train" in f]
 
     for file in files:
         with open(file) as json_file:
@@ -54,4 +54,4 @@ if __name__ == "__main__":
                             invalid_ans_count += 1
                         total_ans_count += 1
 
-        print(f'{file}: errors {invalid_ans_count} / {total_ans_count}')
+        print(f'{file}: errors {invalid_ans_count} / {total_ans_count} ({invalid_ans_count / total_ans_count * 100}%)')
