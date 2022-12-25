@@ -2,7 +2,7 @@
 export BASEPATH=/home/ofri/qa_translate
 export PYTHONPATH=${BASEPATH}/src
 export DATAPATH=${BASEPATH}/data
-export CUDA_VISIBLE_DEVICES=0,1
+export CUDA_VISIBLE_DEVICES=2,3
 
 
 for lang in "ar" "de" "el" "es" "hi" "ru" "th" "tr" "vi" "zh-CN"
