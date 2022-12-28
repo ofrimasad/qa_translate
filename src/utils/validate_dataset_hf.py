@@ -17,7 +17,7 @@ if __name__ == "__main__":
         files = [opt.input_path]
     else:
         files = os.listdir(opt.input_path)
-        files = [os.path.join(opt.input_path, f) for f in files if f.endswith('.json') and "hf" in f and "train" in f]
+        files = [os.path.join(opt.input_path, f) for f in sorted(files) if f.endswith('.json') and "hf" in f and "train" in f]
 
     for file in files:
         with open(file) as json_file:
