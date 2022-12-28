@@ -141,7 +141,7 @@ if __name__ == "__main__":
 
                             # if long sentence and failed to match
                             if opt.both and score < opt.match_thresh and length > 15:
-                                new_answer, cor_score = cor_matcher.match(translated_context, original_text)
+                                new_answer, cor_score = cor_matcher.match(translated_context, translated_text)
 
                             if score > opt.match_thresh or cor_score > 0.5:
 
