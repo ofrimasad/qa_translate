@@ -47,7 +47,7 @@ def add_markers(text: str, sentence_splitter: SentenceSpliter):
     sentences = sentence_splitter.sentence_split(text)
     out = ''
     for s in sentences[:-1]:
-        out += f'{s}[{SEP}] '
+        out += f'{s} [{SEP}] '
     out += sentences[-1]
     return out
 
@@ -86,7 +86,7 @@ def align_indices(original_context: str, translated_context: str, original_text:
 
         translated_context = fix_sep(translated_context)
 
-        original_context = original_context.replace(f'[{SEP}]', '')
+        original_context = original_context.replace(f' [{SEP}]', '')
         original_start_index = link.object["answer_start"]
 
         if using_separetor:
@@ -213,7 +213,7 @@ if __name__ == "__main__":
     for k, v in opt.__dict__.items(): print(f'{k}:\t{v}')
 
     target = LANGUAGES[opt.language_sym]
-    output_json = opt.input_json.replace('.json', f'_{target.symbol}_base_n.json')
+    output_json = opt.input_json.replace('.json', f'_{target.symbol}_base{"_newline" if opt.newline_sep else "" }.json')
     translator = GoogleTranslate(source=English, target=target)
     if opt.newline_sep:
         SEP = '\n'
