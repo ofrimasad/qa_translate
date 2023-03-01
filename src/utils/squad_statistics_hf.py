@@ -139,6 +139,7 @@ if __name__ == "__main__":
     else:
         files = [opt.input_path]
 
+    files = sorted(files)
     for file_path in files:
 
         with open(file_path) as json_file:
