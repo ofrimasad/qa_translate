@@ -56,7 +56,7 @@ require_version("datasets>=1.8.0", "To fix: pip install -r examples/pytorch/ques
 
 logger = logging.getLogger(__name__)
 
-
+datasets.set_caching_enabled(False)
 @dataclass
 class ModelArguments:
     """
@@ -375,6 +375,74 @@ def main():
         tokenized_examples["start_positions"] = []
         tokenized_examples["end_positions"] = []
 
+        # class MyEncoding:
+        #     """
+        #     The :class:`~tokenizers.Encoding` represents the output of a :class:`~tokenizers.Tokenizer`.
+        #     """
+        #     def __init__(self, other):
+        #         self._other = other
+        #         self.char_to_token = other.char_to_token
+        #         self.char_to_word = other.char_to_word
+        #         self.pad = other.pad = other.pad
+        #         self.set_sequence_id = other.set_sequence_id
+        #         self.token_to_chars = other.token_to_chars
+        #         self.token_to_sequence = other.token_to_sequence
+        #         self.token_to_word = other.token_to_word
+        #         self.truncate = other.truncate
+        #         self.word_to_chars = other.word_to_chars
+        #         self.word_to_tokens = other.word_to_tokens
+        #
+        #     @property
+        #     def attention_mask(self):
+        #         return self._other.attention_mask
+        #
+        #
+        #     @property
+        #     def ids(self):
+        #         return self._other.ids
+        #
+        #     @property
+        #     def n_sequences(self):
+        #         return self._other.n_sequences + 1
+        #
+        #     @property
+        #     def offsets(self):
+        #         return self._other.offsets
+        #
+        #     @property
+        #     def overflowing(self):
+        #         return self._other.overflowing
+        #
+        #     @property
+        #     def special_tokens_mask(self):
+        #         return self._other.special_tokens_mask
+        #
+        #     @property
+        #     def tokens(self):
+        #         return self._other.tokens
+        #
+        #     @property
+        #     def type_ids(self):
+        #         return self._other.type_ids
+        #
+        #     @property
+        #     def word_ids(self):
+        #         return self._other.word_ids
+        #
+        #
+        #     @property
+        #     def words(self):
+        #         return self._other.words
+        #
+        #     @property
+        #     def sequence_ids(self):
+        #         _orig = self._other.sequence_ids
+        #         _orig[50] = 3
+        #         return _orig
+        #
+        #
+        #
+        # tokenized_examples._encodings = [MyEncoding(e) for e in tokenized_examples.encodings]
         for i, offsets in enumerate(offset_mapping):
             # We will label impossible answers with the index of the CLS token.
             input_ids = tokenized_examples["input_ids"][i]
