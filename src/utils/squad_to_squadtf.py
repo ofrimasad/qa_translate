@@ -21,7 +21,7 @@ def squad2_to_squad2hf(_data: list) -> list:
                     'id': qa['id']
                 }
 
-                if qa['is_impossible']:
+                if 'is_impossible' in qa and qa['is_impossible']:
                     new_item['answers'] = {'text': [], 'answer_start': []}
                 else:
                     new_item['answers'] = {'text': [a['text'] for a in qa['answers']], 'answer_start': [a['answer_start'] for a in qa['answers']]}
@@ -51,7 +51,7 @@ if __name__ == "__main__":
 
         new_data = squad2_to_squad2hf(data)
 
-        output_path = input_path.replace('2.0', '2.0hf')
+        output_path = input_path.replace('.json','_hf.json')
         with open(output_path, 'w') as json_out:
             full_doc['data'] = new_data
             full_doc['version'] = 'v2.0'
