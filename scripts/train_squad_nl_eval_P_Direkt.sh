@@ -2,14 +2,14 @@
 export BASEPATH=/home/ofri/qa_translate
 export PYTHONPATH=${BASEPATH}/src
 export DATAPATH=${BASEPATH}/data
-export CUDA_VISIBLE_DEVICES=0,1
+export CUDA_VISIBLE_DEVICES=2,3
 
 python ${PYTHONPATH}/train/run_qa.py \
   --model_name_or_path bert-base-multilingual-cased \
   --train_file=${DATAPATH}/squad/enq_25_12_2022/train_v1.0hf_nl_0.05_enq_both.json \
-  --validation_file=${DATAPATH}/dutch/P-Direkt_full/pd_qa_1.1_hf.json \
-  --test_file=${DATAPATH}/dutch/P-Direkt_full/pd_qa_1.1_hf.json \
-  --output_dir=${BASEPATH}/exp_xquad_new/train_squad_nl_enq_25_12_2022_test_P_Direkt\
+  --validation_file=${DATAPATH}/dutch/P-Direkt_full/pd_qa_1.1_x4_hf.json \
+  --test_file=${DATAPATH}/dutch/P-Direkt_full/pd_qa_1.1_x4_hf.json \
+  --output_dir=${BASEPATH}/exp_xquad_new/train_squad_nl_enq_25_12_2022_test_P_Direkt \
   --run_name=train_squad_both_matcher_aug_test_xquad_cs \
   --do_train \
   --do_eval \
