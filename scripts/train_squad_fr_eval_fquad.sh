@@ -6,7 +6,7 @@ export CUDA_VISIBLE_DEVICES=0,1
 
 python ${PYTHONPATH}/train/run_qa.py \
   --model_name_or_path camembert-base \
-  --train_file=${DATAPATH}/squad/enq_25_12_2022/train_v1.0hf_sv_0.05_enq_both.json \
+  --train_file=${DATAPATH}/squad/enq_25_12_2022/train_v1.0hf_fr_0.05_enq_both.json \
   --validation_file=${DATAPATH}/download-form-fquad1.0/valid_hf.json \
   --test_file=${DATAPATH}/swedish/download-form-fquad1.0/valid_hf.json \
   --output_dir=${BASEPATH}/exp_xquad_new/train_squad_fr_enq_25_12_2022_test_fquad \
